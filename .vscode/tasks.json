@@ -1,0 +1,42 @@
+{
+    "tasks": [
+        {
+            "type": "shell",
+            "label": "Premake",
+            "command": "./compile/premake5",
+            "group": {
+                "kind": "build"
+            },
+            "linux": {
+                "args": [ "gmake" ]
+            },
+        },
+        {
+            "type": "shell",
+            "label": "Build Debug",
+            "dependsOrder": "sequence",
+            "dependsOn": [ "Premake" ],
+            "group": {
+                "kind": "build"
+            },
+            "linux": {
+                "command": "make",
+                "args": [ "config=debug" ]
+            }
+        },
+        {
+            "type": "shell",
+            "label": "Build Release",
+            "dependsOrder": "sequence",
+            "dependsOn": [ "Premake" ],
+            "group": {
+                "kind": "build"
+            },
+            "linux": {
+                "command": "make",
+                "args": [ "config=release" ]
+            }
+        }
+    ],
+    "version": "2.0.0"
+}
