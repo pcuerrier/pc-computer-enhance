@@ -7,7 +7,7 @@ project "sim8086"
     targetdir "bin/%{cfg.buildcfg}"
 
     files {
-        "%{prj.name}/src/**.c",
+        "%{prj.name}/src/**.cpp",
     }
 
     filter "configurations:Debug"
