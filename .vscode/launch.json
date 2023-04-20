@@ -8,8 +8,8 @@
             "name": "Launch Debug",
             "type": "cppdbg",
             "request": "launch",
-            "program": "${workspaceFolder}/bin/Debug/${workspaceFolderBasename}",
-            "preLaunchTask": "Build Debug",
+            "program": "${workspaceFolder}/bin/Debug/sim8086.exe",
+            "args": ["..\\sim8086\\data\\listing_0039_more_movs"],
             "cwd": ".",
             "linux": {
                 "MIMode": "gdb",
@@ -25,8 +25,7 @@
             "linux": {
                 "MIMode": "gdb",
                 "miDebuggerPath": "/usr/bin/gdb"
-            },
-            "preLaunchTask": "Build Release"
+            }
         }
           
     ]
