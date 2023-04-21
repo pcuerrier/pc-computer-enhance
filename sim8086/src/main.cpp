@@ -1,7 +1,19 @@
 #include <stdio.h>
 
-constexpr const char* reg8FieldEncoding[8] = {"al", "cl", "dl", "bl", "ah", "ch", "dh", "bh"};
-constexpr const char* reg16FieldEncoding[8] = {"ax", "cx", "dx", "bx", "sp", "bp", "si", "di"};
+const char* regFieldEncoding[2][2][8] =
+{
+    {
+        {"al", "cl", "dl", "bl", "ah", "ch", "dh", "bh"},
+        {"ax", "cx", "dx", "bx", "sp", "bp", "si", "di"}
+    },
+    {
+        {"bx + si", "bx + di", "bp + si", "bp + di", "si", "di", "DIRECT", "bx"},
+        {"xx", "xx", "xx", "xx", "xx", "xx", "xx", "xx"}
+    }
+};
+
+const unsigned char MOV_REG_REG = 0b100010;
+const unsigned char MOV_IMM_REG = 0b1011;
 
 int main(int argc, char** argv)
 {
@@ -22,28 +34,83 @@ int main(int argc, char** argv)
     while (!feof(asmFile))
     {
         unsigned char byte = fgetc(asmFile);
-        unsigned char optcode = (byte >> 2);
-        unsigned char dOption = ((byte >> 1) & 0b1);
-        unsigned char wOption = (byte & 0b1);
 
-        byte = fgetc(asmFile);
-        //unsigned char mod = (byte >> 6);
-        unsigned char reg = ((byte >> 3) & 0b111);
-        unsigned char rem = (byte & 0b111);
-
-        if (optcode == 0b100010) // mov
+        if ((byte >> 4) == MOV_IMM_REG)
         {
-            unsigned char* dst = &rem;
-            unsigned char* src = &reg;
-            if (dOption)
+            unsigned char wOption = ((byte >> 3) & 0b1);
+            unsigned char reg = (byte & 0b111);
+            unsigned char data1 = fgetc(asmFile);
+            if (wOption) // 16-bits register
             {
-                dst = &reg;
-                src = &rem;
+                unsigned char data2 = fgetc(asmFile);
+                printf("mov %s, %hd\n", regFieldEncoding[0][wOption][reg], (data1 | data2 << 8));
             }
-            printf("mov %s, %s\n",
-                wOption ? reg16FieldEncoding[*dst] : reg8FieldEncoding[*dst],
-                wOption ? reg16FieldEncoding[*src] : reg8FieldEncoding[*src]
-            );
+            else // 8-bits register
+            {
+                printf("mov %s, %hhd\n", regFieldEncoding[0][wOption][reg], data1);
+            }
+        }
+        else if ((byte >> 2) == MOV_REG_REG)
+        {
+            unsigned char dOption = ((byte >> 1) & 0b1);
+            unsigned char wOption = (byte & 0b1);
+
+            byte = fgetc(asmFile);
+            unsigned char mod = (byte >> 6);
+            unsigned char reg = ((byte >> 3) & 0b111);
+            unsigned char r_m = (byte & 0b111);
+
+            if (mod == 0b11)
+            {
+                unsigned char* dst = &r_m;
+                unsigned char* src = &reg;
+                if (dOption)
+                {
+                    dst = &reg;
+                    src = &r_m;
+                }
+                printf("mov %s, %s\n", regFieldEncoding[0][wOption][*dst], regFieldEncoding[0][wOption][*src]);
+            }
+            else
+            {
+                if (mod == 0)
+                {
+                    if (dOption)
+                    {
+                        printf("mov %s, [%s]\n", regFieldEncoding[0][wOption][reg], regFieldEncoding[1][0][r_m]);
+                    }
+                    else
+                    {
+                        printf("mov [%s], %s\n", regFieldEncoding[1][0][r_m], regFieldEncoding[0][wOption][reg]);
+                    }
+                }
+                else if (mod == 1)
+                {
+                    unsigned char data1 = fgetc(asmFile);
+                    if (dOption)
+                    {
+                        printf("mov %s, [%s + %hhd]\n", regFieldEncoding[0][wOption][reg], regFieldEncoding[1][0][r_m], data1);
+                    }
+                    else
+                    {
+                        printf("mov [%s + %hhd], %s\n", regFieldEncoding[1][0][r_m], data1, regFieldEncoding[0][wOption][reg]);
+                    }
+                }
+                else
+                {
+                    unsigned char data1 = fgetc(asmFile);
+                    unsigned char data2 = fgetc(asmFile);
+                    short data = data1 | data2 << 8;
+                    if (dOption)
+                    {
+                        printf("mov %s, [%s + %hd]\n", regFieldEncoding[0][wOption][reg], regFieldEncoding[1][0][r_m], data);
+                    }
+                    else
+                    {
+                        printf("mov [%s + %hd], %s\n", regFieldEncoding[1][0][r_m], data, regFieldEncoding[0][wOption][reg]);
+                    }
+                }
+            }
         }
     }
     fclose(asmFile);
