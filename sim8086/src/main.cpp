@@ -71,44 +71,41 @@ int main(int argc, char** argv)
                 }
                 printf("mov %s, %s\n", regFieldEncoding[0][wOption][*dst], regFieldEncoding[0][wOption][*src]);
             }
-            else
+            else if (mod == 0)
             {
-                if (mod == 0)
+                if (dOption)
                 {
-                    if (dOption)
-                    {
-                        printf("mov %s, [%s]\n", regFieldEncoding[0][wOption][reg], regFieldEncoding[1][0][r_m]);
-                    }
-                    else
-                    {
-                        printf("mov [%s], %s\n", regFieldEncoding[1][0][r_m], regFieldEncoding[0][wOption][reg]);
-                    }
-                }
-                else if (mod == 1)
-                {
-                    unsigned char data1 = fgetc(asmFile);
-                    if (dOption)
-                    {
-                        printf("mov %s, [%s + %hhd]\n", regFieldEncoding[0][wOption][reg], regFieldEncoding[1][0][r_m], data1);
-                    }
-                    else
-                    {
-                        printf("mov [%s + %hhd], %s\n", regFieldEncoding[1][0][r_m], data1, regFieldEncoding[0][wOption][reg]);
-                    }
+                    printf("mov %s, [%s]\n", regFieldEncoding[0][wOption][reg], regFieldEncoding[1][0][r_m]);
                 }
                 else
                 {
-                    unsigned char data1 = fgetc(asmFile);
-                    unsigned char data2 = fgetc(asmFile);
-                    short data = data1 | data2 << 8;
-                    if (dOption)
-                    {
-                        printf("mov %s, [%s + %hd]\n", regFieldEncoding[0][wOption][reg], regFieldEncoding[1][0][r_m], data);
-                    }
-                    else
-                    {
-                        printf("mov [%s + %hd], %s\n", regFieldEncoding[1][0][r_m], data, regFieldEncoding[0][wOption][reg]);
-                    }
+                    printf("mov [%s], %s\n", regFieldEncoding[1][0][r_m], regFieldEncoding[0][wOption][reg]);
+                }
+            }
+            else if (mod == 1)
+            {
+                char data1 = fgetc(asmFile);
+                if (dOption)
+                {
+                    printf("mov %s, [%s %s %hhd]\n", regFieldEncoding[0][wOption][reg], regFieldEncoding[1][0][r_m], data1 < 0 ? "-" : "+", data1 < 0 ? -data1 : data1);
+                }
+                else
+                {
+                    printf("mov [%s %s %hhd], %s\n", regFieldEncoding[1][0][r_m], data1 < 0 ? "-" : "+", data1 < 0 ? -data1 : data1, regFieldEncoding[0][wOption][reg]);
+                }
+            }
+            else
+            {
+                unsigned char data1 = fgetc(asmFile);
+                unsigned char data2 = fgetc(asmFile);
+                short data = data1 | data2 << 8;
+                if (dOption)
+                {
+                    printf("mov %s, [%s %s %hd]\n", regFieldEncoding[0][wOption][reg], regFieldEncoding[1][0][r_m], data < 0 ? "-" : "+", data < 0 ? -data : data);
+                }
+                else
+                {
+                    printf("mov [%s %s %hd], %s\n", regFieldEncoding[1][0][r_m], data < 0 ? "-" : "+", data < 0 ? -data : data, regFieldEncoding[0][wOption][reg]);
                 }
             }
         }
