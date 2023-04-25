@@ -1,4 +1,5 @@
 #include <stdio.h>
+#include <unistd.h>
 
 const char* regFieldEncoding[2][2][8] =
 {
@@ -12,11 +13,19 @@ const char* regFieldEncoding[2][2][8] =
     }
 };
 
-const unsigned char MOV_REG_REG = 0b100010;
-const unsigned char MOV_IMM_REG = 0b1011;
+const unsigned char MOV_REG_REG = 0b10001000;
+const unsigned char MOV_IMM_REG = 0b10110000;
+
+inline bool checkOptCode(unsigned char optCode, unsigned char compare)
+{
+    return (optCode & compare) == compare;
+}
 
 int main(int argc, char** argv)
 {
+    char cwd[256];
+    getcwd(cwd, sizeof(cwd));
+    printf("CWD : %s\n", cwd);
     if (argc != 2)
     {
         printf("Invalid usage! Usage: sim8086 <asm file>\n");
@@ -31,11 +40,11 @@ int main(int argc, char** argv)
     }
 
     printf("bits 16\n");
-    while (!feof(asmFile))
+    int intByte = 0;
+    while ( (intByte = fgetc(asmFile)) != EOF )
     {
-        unsigned char byte = fgetc(asmFile);
-
-        if ((byte >> 4) == MOV_IMM_REG)
+        unsigned char byte = intByte;
+        if (checkOptCode(byte, MOV_IMM_REG))
         {
             unsigned char wOption = ((byte >> 3) & 0b1);
             unsigned char reg = (byte & 0b111);
@@ -50,7 +59,7 @@ int main(int argc, char** argv)
                 printf("mov %s, %hhd\n", regFieldEncoding[0][wOption][reg], data1);
             }
         }
-        else if ((byte >> 2) == MOV_REG_REG)
+        else if (checkOptCode(byte,MOV_REG_REG))
         {
             unsigned char dOption = ((byte >> 1) & 0b1);
             unsigned char wOption = (byte & 0b1);
