@@ -1,42 +1,91 @@
 {
-    "tasks": [
-        {
-            "type": "shell",
-            "label": "Premake",
-            "command": "./compile/premake5",
-            "group": {
-                "kind": "build"
-            },
-            "linux": {
-                "args": [ "gmake" ]
-            },
-        },
-        {
-            "type": "shell",
-            "label": "Build Debug",
-            "dependsOrder": "sequence",
-            "dependsOn": [ "Premake" ],
-            "group": {
-                "kind": "build"
-            },
-            "linux": {
-                "command": "make",
-                "args": [ "config=debug" ]
-            }
-        },
-        {
-            "type": "shell",
-            "label": "Build Release",
-            "dependsOrder": "sequence",
-            "dependsOn": [ "Premake" ],
-            "group": {
-                "kind": "build"
-            },
-            "linux": {
-                "command": "make",
-                "args": [ "config=release" ]
-            }
+    "version": "2.0.0",
+    "windows": {
+        "options": {
+          "shell": {
+            "executable": "cmd.exe",
+            "args": [
+              "/C",
+              // The path to VsDevCmd.bat depends on the version of Visual Studio you have installed.
+              "\"C:/Program Files/Microsoft Visual Studio/2022/Community/VC/Auxiliary/Build/vcvars64.bat\"",
+              "&&"
+            ]
+          }
         }
-    ],
-    "version": "2.0.0"
+    },
+    "tasks": [
+      {
+        "type": "shell",
+        "label": "Sim8086 [Windows Debug]",
+        "command": "cl.exe",
+        "args": [
+          "/FC",
+          "/Od",
+          "/MTd",
+          "/Z7",
+          "/WX",
+          "/W4",
+          "/wd4100",
+          "/wd4189",
+          "/wd4201",
+          "/EHsc",
+          "/nologo",
+          "/D",
+          "_WINDOWS",
+          "/Fo:",
+          "${workspaceFolder}\\bin-int\\debug\\",
+          "/Fe:",
+          "${workspaceFolder}\\bin\\debug\\sim8086.exe",
+          "${workspaceFolder}\\sim8086\\src\\**.cpp",
+          "/link",
+          "/opt:ref"
+        ],
+        "options": {
+          "cwd": "${workspaceFolder}"
+        },
+        "presentation": {
+          "reveal": "always"
+        },
+        "problemMatcher": "$msCompile",
+        "group": {
+          "kind": "build",
+          "isDefault": true
+        }
+      },
+      {
+        "type": "shell",
+        "label": "Tests [Windows Debug]",
+        "command": "cl.exe",
+        "args": [
+          "/FC",
+          "/O2",
+          "/wd4100",
+          "/wd4189",
+          "/wd4201",
+          "/EHsc",
+          "/nologo",
+          "/std:c++20",
+          "/D",
+          "_WINDOWS",
+          "/Fo:",
+          "${workspaceFolder}\\bin-int\\debug\\",
+          "/Fe:",
+          "${workspaceFolder}\\bin\\debug\\tests.exe",
+          "${workspaceFolder}\\sim8086\\tests\\**.cpp",
+          "/link",
+          "/opt:ref"
+        ],
+        "options": {
+          "cwd": "${workspaceFolder}"
+        },
+        "presentation": {
+          "reveal": "always"
+        },
+        "problemMatcher": "$msCompile",
+        "group": {
+          "kind": "test",
+          "isDefault": true
+        }
+      }
+    ]
 }

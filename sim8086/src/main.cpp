@@ -23,8 +23,8 @@ int main(int argc, char** argv)
         return 1;
     }
 
-    FILE* asmFile = fopen(argv[1], "r");
-    if (!asmFile)
+    FILE* asmFile = nullptr;
+    if (fopen_s(&asmFile, argv[1], "r") != 0 || !asmFile)
     {
         printf("Cannot open file %s\n", argv[1]);
         return 1;
@@ -33,16 +33,16 @@ int main(int argc, char** argv)
     printf("bits 16\n");
     while (!feof(asmFile))
     {
-        unsigned char byte = fgetc(asmFile);
+        unsigned char byte = static_cast<unsigned char>(fgetc(asmFile));
 
         if ((byte >> 4) == MOV_IMM_REG)
         {
             unsigned char wOption = ((byte >> 3) & 0b1);
             unsigned char reg = (byte & 0b111);
-            unsigned char data1 = fgetc(asmFile);
+            unsigned char data1 = static_cast<unsigned char>(fgetc(asmFile));
             if (wOption) // 16-bits register
             {
-                unsigned char data2 = fgetc(asmFile);
+                unsigned char data2 = static_cast<unsigned char>(fgetc(asmFile));
                 printf("mov %s, %hd\n", regFieldEncoding[0][wOption][reg], (data1 | data2 << 8));
             }
             else // 8-bits register
@@ -55,7 +55,7 @@ int main(int argc, char** argv)
             unsigned char dOption = ((byte >> 1) & 0b1);
             unsigned char wOption = (byte & 0b1);
 
-            byte = fgetc(asmFile);
+            byte = static_cast<unsigned char>(fgetc(asmFile));
             unsigned char mod = (byte >> 6);
             unsigned char reg = ((byte >> 3) & 0b111);
             unsigned char r_m = (byte & 0b111);
@@ -86,7 +86,7 @@ int main(int argc, char** argv)
                 }
                 else if (mod == 1)
                 {
-                    unsigned char data1 = fgetc(asmFile);
+                    unsigned char data1 = static_cast<unsigned char>(fgetc(asmFile));
                     if (dOption)
                     {
                         printf("mov %s, [%s + %hhd]\n", regFieldEncoding[0][wOption][reg], regFieldEncoding[1][0][r_m], data1);
@@ -98,8 +98,8 @@ int main(int argc, char** argv)
                 }
                 else
                 {
-                    unsigned char data1 = fgetc(asmFile);
-                    unsigned char data2 = fgetc(asmFile);
+                    unsigned char data1 = static_cast<unsigned char>(fgetc(asmFile));
+                    unsigned char data2 = static_cast<unsigned char>(fgetc(asmFile));
                     short data = data1 | data2 << 8;
                     if (dOption)
                     {

@@ -5,28 +5,19 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "name": "Launch Debug",
-            "type": "cppdbg",
-            "request": "launch",
-            "program": "${workspaceFolder}/bin/Debug/sim8086.exe",
-            "args": ["..\\sim8086\\data\\listing_0039_more_movs"],
-            "cwd": ".",
-            "linux": {
-                "MIMode": "gdb",
-                "miDebuggerPath": "/usr/bin/gdb"
-            }
-        },
-        {
-            "name": "Launch Release",
-            "type": "cppdbg",
-            "request": "launch",
-            "program": "${workspaceFolder}/bin/Release/${workspaceFolderBasename}",
-            "cwd": ".",
-            "linux": {
-                "MIMode": "gdb",
-                "miDebuggerPath": "/usr/bin/gdb"
-            }
+          "name": "Rogue [Debug]",
+          "type": "cppvsdbg",
+          "request": "launch",
+          "program": "${workspaceRoot}/bin/debug/sim8086.exe",
+          "stopAtEntry": true,
+          "cwd": "${workspaceFolder}",
+          "environment": [],
+          "internalConsoleOptions": "openOnSessionStart",
+          "logging": {
+              "moduleLoad": false,
+              "programOutput": true,
+              "trace": false
+          }
         }
-          
-    ]
+      ]
 }
