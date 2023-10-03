@@ -1,5 +1,27 @@
 {
     "version": "2.0.0",
+    "inputs": [
+      {
+        "type": "pickString",
+        "id": "build-configuration",
+        "description": "Select build configuration",
+        "options": [
+          "Debug",
+          "Release",
+        ],
+        "default": "Debug"
+      },
+      {
+        "type": "pickString",
+        "id": "test-configuration",
+        "description": "Select test configuration",
+        "options": [
+          "Debug",
+          "Release",
+        ],
+        "default": "Debug"
+      }
+    ],
     "windows": {
         "options": {
           "shell": {
@@ -16,29 +38,11 @@
     "tasks": [
       {
         "type": "shell",
-        "label": "Sim8086 [Windows Debug]",
-        "command": "cl.exe",
+        "label": "Build [Windows]",
+        "command": "msbuild.exe",
         "args": [
-          "/FC",
-          "/Od",
-          "/MTd",
-          "/Z7",
-          "/WX",
-          "/W4",
-          "/wd4100",
-          "/wd4189",
-          "/wd4201",
-          "/EHsc",
-          "/nologo",
-          "/D",
-          "_WINDOWS",
-          "/Fo:",
-          "${workspaceFolder}\\bin-int\\debug\\",
-          "/Fe:",
-          "${workspaceFolder}\\bin\\debug\\sim8086.exe",
-          "${workspaceFolder}\\sim8086\\src\\**.cpp",
-          "/link",
-          "/opt:ref"
+          "${workspaceFolder}/sim8086.sln",
+          "/p:Configuration=${input:build-configuration}",
         ],
         "options": {
           "cwd": "${workspaceFolder}"
@@ -54,26 +58,10 @@
       },
       {
         "type": "shell",
-        "label": "Tests [Windows Debug]",
-        "command": "cl.exe",
+        "label": "Tests [Windows]",
+        "command": "vstest.console",
         "args": [
-          "/FC",
-          "/O2",
-          "/wd4100",
-          "/wd4189",
-          "/wd4201",
-          "/EHsc",
-          "/nologo",
-          "/std:c++20",
-          "/D",
-          "_WINDOWS",
-          "/Fo:",
-          "${workspaceFolder}\\bin-int\\debug\\",
-          "/Fe:",
-          "${workspaceFolder}\\bin\\debug\\tests.exe",
-          "${workspaceFolder}\\sim8086\\tests\\**.cpp",
-          "/link",
-          "/opt:ref"
+          "${workspaceFolder}/bin/${input:test-configuration}/test.dll"
         ],
         "options": {
           "cwd": "${workspaceFolder}"
@@ -83,8 +71,7 @@
         },
         "problemMatcher": "$msCompile",
         "group": {
-          "kind": "test",
-          "isDefault": true
+          "kind": "test"
         }
       }
     ]
